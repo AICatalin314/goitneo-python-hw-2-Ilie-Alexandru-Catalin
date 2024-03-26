@@ -1,0 +1,57 @@
+def input_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValueError:
+            return "Give me a single name, followed by phone number. Phone must contain only digits"
+        except KeyError:
+            return "Contact not found."
+        except IndexError:
+            return "Invalid command format."
+
+    return inner
+
+contacts = {}
+
+@input_error
+def add_contact(args):
+    name, phone = args
+    contacts[name] = phone
+    return "Contact added."
+
+@input_error
+def remove_contact(args):
+    name = args[0]
+    del contacts[name]
+    return "Contact removed."
+
+@input_error
+def get_contact(args):
+    name = args[0]
+    return contacts[name]
+
+@input_error
+def list_contacts(args):
+    return "\n".join(f"{name}: {phone}" for name, phone in contacts.items())
+
+def handle_command(command):
+    parts = command.split()
+    last_word = parts[-1]
+    if not last_word.isdigit():
+        return "Number must contain only digits"
+    elif parts[0] == "add":
+        return add_contact(parts[1:])
+    elif parts[0] == "remove":
+        return remove_contact(parts[1:])
+    elif parts[0] == "get":
+        return get_contact(parts[1:])
+    elif parts[0] == "list":
+        return list_contacts(parts[1:])
+    else:
+        return "Invalid command."
+
+while True:
+    user_input = input("Input: ")
+    if user_input == "exit":
+        break
+    print(handle_command(user_input))
